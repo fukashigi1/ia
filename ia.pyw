@@ -103,7 +103,7 @@ class ia():
 
     def selectorDePesos(self): #Este metodo añade pesos al diccionario ya creado en "contadorPesos()".
         for capa in self.capaPeso: 
-            for n in range(1, self.capaPeso[capa][0]+1):
+            for n in range(1, self.capaPeso[capa][0]+1): #TEST GITHUB
                 self.capaPeso[capa].append(random.random())
         print(self.capaPeso)
 
