@@ -101,8 +101,8 @@ class ia():
             self.capaPeso[k] = [siguienteCapa * k, k, siguienteCapa]
         print(self.capaPeso)
 
-    def selectorDePesos(self):
-        for capa in self.capaPeso:
+    def selectorDePesos(self): #Este metodo añade pesos al diccionario ya creado en "contadorPesos()".
+        for capa in self.capaPeso: 
             for n in range(1, self.capaPeso[capa][0]+1):
                 self.capaPeso[capa].append(random.random())
         print(self.capaPeso)
