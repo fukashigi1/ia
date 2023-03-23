@@ -10,12 +10,12 @@ class ia():
         #Primer valor: k, Segundo valor: n
         #K, indice totales de columnas de neuronas.
         #N, cantidad de neuronas totales en K.
-        self.kNeuronas = {1: 1, 2: 2, 3: 1} 
+        self.kNeuronas = {1: [1], 2: [2], 3: [1]} 
 
         self.umbral = {} #Primer valor: k, Segundo valor: umbrales.
         self.capaPeso = {} #Primer valor: k, Segundo valor: cantidad de pesos, Tercer valor: j, Cuarto valor: i, Quinto valor: peso
         #Iniciar metodos
-        self.proceso()
+        self.procesoUmbral()
         self.contadorPesos()
         self.ventanaDisplay()
         self.selectorDePesos()
@@ -59,8 +59,8 @@ class ia():
         for x, s in self.data.items():
             table.insert("", "end", values=(x, s))
        
-    #________________________________________________________________________________________________________________________________________________________________________________________       
     def creadorDeBD(self): #Este metodo es llamado desde el front end para generar la tabla.
+        self.data.clear()
         for x in range(1, 51):
             for s in range(1, 51):
                 x = random.randint(-100, 100)
@@ -70,6 +70,7 @@ class ia():
                     s = 0
                 self.data[x] = s
         print(self.data)
+    #________________________________________________________________________________________________________________________________________________________________________________________       
 
     def entradaValor(valor, lista):
         valorConvertido = (valor - min(lista))/(max(lista) - min(lista))
@@ -78,18 +79,7 @@ class ia():
     def salidaValor(valorFinal, lista):
         return (max(lista) - min(lista) * valorFinal + min(lista))
     
-    def proceso(self):
-        cantidadUmbrales = [] #Lista momentanea para almacenar los valores del umbral.
-        for capa in self.kNeuronas:
-            print(f'Capa: {capa} -> {self.kNeuronas[capa]} neuronas.')
-            for n in range(0, self.kNeuronas[capa]): #Por cada neurona en el rango de 0 a k.
-                if capa == 1: #La capa uno es la entrada (x), no lleva umbral.
-                    pass
-                else:
-                    cantidadUmbrales.append(random.random()) #Añadir a la lista un valor random por cada neurona.
-            self.umbral[capa] = cantidadUmbrales
-            cantidadUmbrales = [] #Reiniciar la lista momentanea.
-        print(self.umbral)
+    
 
     def contadorPesos(self):
         for k in self.kNeuronas:
@@ -107,5 +97,9 @@ class ia():
                 self.capaPeso[capa].append(random.random())
         print(self.capaPeso)
 
+    #def imprimirRed(self):
+    #    for k, n in self.kNeuronas:
+    #        
+#
 if __name__ == "__main__":
     ia()
