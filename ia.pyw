@@ -1,4 +1,5 @@
 import random
+from time import sleep
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
@@ -7,18 +8,19 @@ import pandas as pd
 class ia():
     def __init__(self): #MAIN
         self.data = {} #clave X, valor S
-        #Primer valor: k, Segundo valor: n
+        #Primer valor: k, Segundo valor: n, Tercer valor: u.
         #K, indice totales de columnas de neuronas.
         #N, cantidad de neuronas totales en K.
+        #U, es el umbral correspondiente a cada neurona.
         self.kNeuronas = {1: [1], 2: [2], 3: [1]} 
-
-        self.umbral = {} #Primer valor: k, Segundo valor: umbrales.
         self.capaPeso = {} #Primer valor: k, Segundo valor: cantidad de pesos, Tercer valor: j, Cuarto valor: i, Quinto valor: peso
         #Iniciar metodos
+        
         self.procesoUmbral()
         self.contadorPesos()
-        self.ventanaDisplay()
         self.selectorDePesos()
+        self.imprimirRed()
+        #self.ventanaDisplay()
 
     def ventanaDisplay(self): #Método para mostrar ventana FRONT END.
         raiz = Tk() 
@@ -69,7 +71,6 @@ class ia():
                 else:
                     s = 0
                 self.data[x] = s
-        print(self.data)
     #________________________________________________________________________________________________________________________________________________________________________________________       
 
     def entradaValor(valor, lista):
@@ -79,27 +80,78 @@ class ia():
     def salidaValor(valorFinal, lista):
         return (max(lista) - min(lista) * valorFinal + min(lista))
     
-    
+    def procesoUmbral(self): #Se le añade al diccionario kNeuronas la cantidad de umbrales acorde a N en K.
+        for capa in self.kNeuronas:
+            for n in range(1, self.kNeuronas[capa][0]+1):
+                if capa == 1:
+                    pass #Se omite la capa 1 porque es de entrada (X)
+                else:
+                    self.kNeuronas[capa].append(random.random())
 
     def contadorPesos(self):
         for k in self.kNeuronas:
             try:
-                siguienteCapa = self.kNeuronas[k+1]
+                siguienteCapa = self.kNeuronas[k+1][0]
             except:
                 break
-            #capaPeso tomara valores de Primer valor: indice de peso, Segundo valor: Cantidad de pesos, Tercer valor: j, cuarto valor: i.
-            self.capaPeso[k] = [siguienteCapa * k, k, siguienteCapa]
-        print(self.capaPeso)
+            #capaPeso tomara valores de Primer valor: indice de peso, Segundo valor: Cantidad de pesos, Tercer valor: j, cuarto valor: i, QUINTO VALOR (selectorPesos(): peso).
+            self.capaPeso[k] = [(siguienteCapa * k), k, siguienteCapa]  
 
     def selectorDePesos(self): #Este metodo añade pesos al diccionario ya creado en "contadorPesos()".
         for capa in self.capaPeso: 
             for n in range(1, self.capaPeso[capa][0]+1): #TEST GITHUB
                 self.capaPeso[capa].append(random.random())
+    def imprimirRed(self):
+        linea = "_____________________________________"
+        print(linea)
+        for capa in self.kNeuronas:
+            print(f'Capa de neuronas {capa}')
+            if(capa == 1): #El valor de entrada no lleva umbral
+                print(f'> Neurona número: [{self.kNeuronas[capa][0]}]\n> Umbral: [No posee]')
+                print(linea)
+            else:
+                incremental = 0
+                while incremental != self.kNeuronas[capa][0]:
+                    print(f'> Neurona número: [{incremental+1}]\n> Umbral: [{self.kNeuronas[capa][incremental+1]}]')
+                    incremental = incremental + 1
+                print(linea)
+        for capaPeso in self.capaPeso:
+            print(f'Capa de pesos {capaPeso}')
+            incrementalPeso = 0
+            while incrementalPeso != self.capaPeso[capaPeso][0]:
+                print(f'> Peso número: [{incrementalPeso+1}]\n> Peso: [{self.capaPeso[capaPeso][incrementalPeso+3]}]')
+                print(f'> Comienza en neurona: [{capaPeso}]\n> Termina en neurona: [{capaPeso+1}]')
+                incrementalPeso = incrementalPeso + 1#no se imprimen bien los pesos
+            print(linea)
         print(self.capaPeso)
-
-    #def imprimirRed(self):
-    #    for k, n in self.kNeuronas:
-    #        
-#
+#            capaneurona1:
+#            neurona 1 
+#            indice de k
+#            umbral
+#            pesoscapa1:
+#            peso 1
+#            su peso
+#            de neurona j a i
+#            peso 2
+#            su peso
+#            de neurona j a i
+#            capa2:
+#            neurona1
+#            indice de k
+#            umbral
+#            neurona2
+#            indice de k
+#            umbral
+#            pesoscapa2:
+#            peso 1
+#            su peso
+#            de neurona j a i
+#            peso 2
+#            su peso
+#            de neurona j a i
+#            capa3:
+#            neurona 1
+#            indice de k
+#            umbral
 if __name__ == "__main__":
     ia()
