@@ -13,12 +13,11 @@ class ia():
         #N, cantidad de neuronas totales en K.
         #U, es el umbral correspondiente a cada neurona.
         self.kNeuronas = {1: [1], 2: [2], 3: [1]} 
-        self.capaPeso = {} #Primer valor: k, Segundo valor: cantidad de pesos, Tercer valor: j, Cuarto valor: i, Quinto valor: peso
+        self.capaPeso = {} #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
         #Iniciar metodos
         
         self.procesoUmbral()
         self.contadorPesos()
-        self.selectorDePesos()
         self.imprimirRed()
         #self.ventanaDisplay()
 
@@ -89,18 +88,19 @@ class ia():
                     self.kNeuronas[capa].append(random.random())
 
     def contadorPesos(self):
-        for k in self.kNeuronas:
+        for k in self.kNeuronas: #Por cada capa en kNeuronas
             try:
-                siguienteCapa = self.kNeuronas[k+1][0]
+                siguienteCapa = self.kNeuronas[k+1][0] #Se intentará sacar la siguiente capa de K, si no se puede: cortar for.
             except:
                 break
-            #capaPeso tomara valores de Primer valor: indice de peso, Segundo valor: Cantidad de pesos, Tercer valor: j, cuarto valor: i, QUINTO VALOR (selectorPesos(): peso).
-            self.capaPeso[k] = [(siguienteCapa * k), k, siguienteCapa]  
+            #capaPEso2 Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
+            self.capaPeso[k] = [] #Agregamos una lista vacía al indice de K, para almacenar cada peso individualmente con sus propiedades (cada peso es una nueva lista)
+            for cantidad in range(0, siguienteCapa*k): #Para cantidad de pesos hasta siguienteCapa por K (total de pesos en capa)
+                if siguienteCapa == 1: #Este if indica si la siguiente capa es la última, si es la ultima, añade por defecto i = 1.
+                    self.capaPeso[k].append([random.random(), cantidad+1, 1])
+                else:
+                    self.capaPeso[k].append([random.random(), k, cantidad+1])
 
-    def selectorDePesos(self): #Este metodo añade pesos al diccionario ya creado en "contadorPesos()".
-        for capa in self.capaPeso: 
-            for n in range(1, self.capaPeso[capa][0]+1): #TEST GITHUB
-                self.capaPeso[capa].append(random.random())
     def imprimirRed(self):
         linea = "_____________________________________"
         print(linea)
@@ -115,43 +115,14 @@ class ia():
                     print(f'> Neurona número: [{incremental+1}]\n> Umbral: [{self.kNeuronas[capa][incremental+1]}]')
                     incremental = incremental + 1
                 print(linea)
+        #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
         for capaPeso in self.capaPeso:
-            print(f'Capa de pesos {capaPeso}')
-            incrementalPeso = 0
-            while incrementalPeso != self.capaPeso[capaPeso][0]:
-                print(f'> Peso número: [{incrementalPeso+1}]\n> Peso: [{self.capaPeso[capaPeso][incrementalPeso+3]}]')
-                print(f'> Comienza en neurona: [{capaPeso}]\n> Termina en neurona: [{capaPeso+1}]')
-                incrementalPeso = incrementalPeso + 1#no se imprimen bien los pesos
+            print(f'Capa de peso: {capaPeso}')
+            for cadaPeso in self.capaPeso:
+                print(f'> Peso: [{self.capaPeso[capaPeso][cadaPeso-1][0]}]')
+                print(f'> j: [{self.capaPeso[capaPeso][cadaPeso-1][1]}]')
+                print(f'> i: [{self.capaPeso[capaPeso][cadaPeso-1][2]}]')
             print(linea)
-        print(self.capaPeso)
-#            capaneurona1:
-#            neurona 1 
-#            indice de k
-#            umbral
-#            pesoscapa1:
-#            peso 1
-#            su peso
-#            de neurona j a i
-#            peso 2
-#            su peso
-#            de neurona j a i
-#            capa2:
-#            neurona1
-#            indice de k
-#            umbral
-#            neurona2
-#            indice de k
-#            umbral
-#            pesoscapa2:
-#            peso 1
-#            su peso
-#            de neurona j a i
-#            peso 2
-#            su peso
-#            de neurona j a i
-#            capa3:
-#            neurona 1
-#            indice de k
-#            umbral
+
 if __name__ == "__main__":
     ia()
