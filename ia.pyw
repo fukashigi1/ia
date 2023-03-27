@@ -10,10 +10,13 @@ class ia():
         #K, indice totales de columnas de neuronas.
         #N, cantidad de neuronas totales en K.
         #U, es el umbral correspondiente a cada neurona.
-        self.kNeuronas = {1: 1, 2: 4, 3: 4, 4: 1} 
+        self.listaData = []
+
+        self.kNeuronas = {1: 1, 2: 3, 3: 3, 4: 1} 
         self.neuronas = {}
         self.capaPeso = {} #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
 
+        self.backPropagationResults = {} #K, capa neuronal, Valor.
         self.sY = {} #Conformado por S: Y.
         self.wE = {} #Conformado por W: Error.
 
@@ -21,6 +24,9 @@ class ia():
         
         self.procesoUmbral()
         self.contadorPesos()
+        self.creadorDeBD() #eliminar al poner interfaz
+        self.convertidorDataALista()
+        self.backPropagation()
         #self.imprimirRed()
         #self.ventanaDisplay()
 
@@ -75,11 +81,15 @@ class ia():
                 self.data[x] = s
     #________________________________________________________________________________________________________________________________________________________________________________________       
 
-    def entradaValor(valor, lista):
+    def convertidorDataALista(self):
+        for clave in self.data:
+            self.listaData.append(clave)
+
+    def entradaValor(self, valor, lista):
         valorConvertido = (valor - min(lista))/(max(lista) - min(lista))
         return round(valorConvertido, 4)
 
-    def salidaValor(valorFinal, lista):
+    def salidaValor(self, valorFinal, lista):
         return (max(lista) - min(lista) * valorFinal + min(lista))
     
     def procesoUmbral(self): #Se le añade al diccionario kNeuronas la cantidad de umbrales acorde a N en K.
@@ -99,34 +109,29 @@ class ia():
                 siguienteCapaNeuronal = self.kNeuronas[k+1]
                 pesosTotalesEnCapa = self.kNeuronas[k]*siguienteCapaNeuronal
                 for capa in range(1, pesosTotalesEnCapa+1):
-                        #ARREGLAR CTMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM FUKA PIENSA CTM
                     self.capaPeso[k].append([random.random()])
-                print(f'capa {k}')
                 contador = 0
                 for j in range(1, self.kNeuronas[k]+1):
-                    print(f'J > {j}')
                     for i in range(1, siguienteCapaNeuronal + 1):
-                        print(f'i > {i}')
                         self.capaPeso[k][contador].append(j)
                         self.capaPeso[k][contador].append(i)
                         contador = contador +1
-        print(f'PESO -> {self.capaPeso}')
 
     def imprimirRed(self):
         linea = "_____________________________________"
         print(linea)
         for capa in self.kNeuronas:
             print(f'Capa de neuronas {capa}')
-            if(capa == 1): #El valor de entrada no lleva umbral
-                print(f'> Neurona número: [{self.neuronas[capa][0][0]}]\n> Umbral: [No posee]')
-                print(linea)
-            else:
-                incremental = 0
-                while incremental != self.kNeuronas[capa]:
+            incremental = 0
+            while incremental != self.kNeuronas[capa]:
+                if(capa == 1): #El valor de entrada no lleva umbral
+                    print(f'> Neurona número: [{self.neuronas[capa][incremental][0]}]\n> Umbral: [No posee]')
+                    incremental = incremental + 1
+                else:
                     print(f'> Neurona número: [{incremental+1}]\n> Umbral: [{self.neuronas[capa][incremental][1]}]')
                     incremental = incremental + 1
-                print(linea)
-        #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
+            print(linea)
+        #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i].
         for capaPeso in self.capaPeso:
             print(f'Capa de peso: {capaPeso}')
             for cadaPeso in self.capaPeso[capaPeso]:
@@ -134,10 +139,57 @@ class ia():
                 print(f'> j: [{cadaPeso[1]}]')
                 print(f'> i: [{cadaPeso[2]}]')
             print(linea)
-    def iniciar(self):
-        pass
+
+    def backPropagation(self): #Funcion que hara el calculo final de Y.
+        for k in self.neuronas:
+            valor = 0
+            self.backPropagationResults[k] = [] #Se inicia la clave K con una lista vacía para que se almecenen individualmente los valores de esa capa K.
+            if k != 1: #si capa es 1 entonces son valores de entrada.
+                valor = []
+                #iterar en capas neuronales
+                #iterar en back propagation capas
+                #iterar en los pesos
+                #iterar en capas denuevo
+                iteracion = 0
+                for resultadoNeuronaAnterior in self.backPropagationResults[k-1]:
+                    for capapeso in self.capaPeso[k-1]:
+                        for capa in self.neuronas[k]:
+                            if capapeso[1] == self.neuronas[k-1][0][0] and capapeso[2] == capa[0]:
+                                iteracion = iteracion + 1  
+                                print(iteracion)
+                        
+            else:
+                valor = self.entradaValor(10, self.listaData) #Se llama a la funcion que transforma valores de entrada a minimos y maximos.
+                self.backPropagationResults[k].append(valor)
+                self.backPropagationResults[k].append(valor+1)
+                self.backPropagationResults[k].append(valor+2) #Se agrega a la capa K de backPropagationResults (diccionario), el valor (pasaría con todas las neuronas de entrada).
+
+
+
+
+        #for k in reversed(self.kNeuronas):
+        #    valor = 0
+        #    self.backPropagationResults[k] = [] #Se inicia la clave K con una lista vacía para que se almecenen individualmente los valores de esa capa K.
+        #    if k == 1: #si capa es 1 entonces son valores de entrada.
+        #        valor = self.entradaValor(10, self.listaData) #Se llama a la funcion que transforma valores de entrada a minimos y maximos.
+        #        self.backPropagationResults[k].append(valor) #Se agrega a la capa K de backPropagationResults (diccionario), el valor (pasaría con todas las neuronas de entrada).
+        #    else:
+        #        #Aquí en caso de que la capa no sea la primera, debemos hacer el calculo de su peso anterior por la neurona conectada por su umbral y almacenarlo en la capa correspondiente.
+        #        for capaAnterior in self.neuronas[k-1]:
+        #            
+
+
+
+            #for funcion in self.backPropagationResults[k-1]:
+            #    for omega in self.capaPeso[k-1]:
+            #        for capa in self.neuronas[k]:
+            #            if omega[1] == len(self.backPropagationResults[k-1]) and omega[2] == capa[0]:
+            #                self.backPropagationResults[k].append((funcion*omega[0])+capa[1])
+                            
+        print(f'BP -> {self.backPropagationResults}')
+        print(f'NEURONAS -> {self.neuronas}')
+        print(f'PESOS -> {self.capaPeso}')
         #transformar el valor de entrada, multiplicar todos los pesos con los umbrales y almacenar el valor final Y, junto con S (otro diccionario)
         #luego sacar el error con respecto a cada peso y almacenarlo en otro diccionario (W: Error)
-        #ALMACENAR LAS NEURONAS INDIVIDUALMENTE EN LISTAS [] CAMBIAR completamente el kneuronas.
 if __name__ == "__main__":
     ia()
