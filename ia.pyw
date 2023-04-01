@@ -12,11 +12,11 @@ class ia():
         #U, es el umbral correspondiente a cada neurona.
         self.listaData = []
 
-        self.kNeuronas = {1: 1, 2: 3, 3: 3, 4: 1} 
-        self.neuronas = {}
+        self.kNeuronas = {1: 1, 2: 3, 3: 1} #Se define la red neuronal.
+        self.neuronas = {} #Aquí se almacenarán las neuronas PrimerValor: N, SegundoValor: Umbral
         self.capaPeso = {} #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
 
-        self.backPropagationResults = {} #K, capa neuronal, Valor.
+        self.forwardPropagationResults = {} #K, capa neuronal, Valor de la funcion de activacion.
         self.sY = {} #Conformado por S: Y.
         self.wE = {} #Conformado por W: Error.
 
@@ -26,8 +26,9 @@ class ia():
         self.contadorPesos()
         self.creadorDeBD() #eliminar al poner interfaz
         self.convertidorDataALista()
-        self.backPropagation()
-        #self.imprimirRed()
+        self.forwardPropagation()
+        self.imprimirRed()
+        self.creadorListaSY()
         #self.ventanaDisplay()
 
     def ventanaDisplay(self): #Método para mostrar ventana FRONT END.
@@ -71,17 +72,16 @@ class ia():
        
     def creadorDeBD(self): #Este metodo es llamado desde el front end para generar la tabla.
         self.data.clear()
-        for x in range(1, 51):
-            for s in range(1, 51):
-                x = random.randint(-100, 100)
-                if x >= 0:
-                    s = 1
-                else:
-                    s = 0
-                self.data[x] = s
+        for x in range(1, 101):
+            x = random.randint(-1000, 1000)
+            if x >= 0:
+                s = 1
+            else:
+                s = 0
+            self.data[x] = s
     #________________________________________________________________________________________________________________________________________________________________________________________       
 
-    def convertidorDataALista(self):
+    def convertidorDataALista(self): #Este metodo transforma el diccionario self.data en una lista que almacena los valores de X
         for clave in self.data:
             self.listaData.append(clave)
 
@@ -92,7 +92,7 @@ class ia():
     def salidaValor(self, valorFinal, lista):
         return (max(lista) - min(lista) * valorFinal + min(lista))
     
-    def procesoUmbral(self): #Se le añade al diccionario kNeuronas la cantidad de umbrales acorde a N en K.
+    def procesoUmbral(self): #Se le añade al diccionario neuronas la cantidad de umbrales acorde a N en K.
         for capa in self.kNeuronas:
             self.neuronas[capa] = []
             for n in range(1, self.kNeuronas[capa]+1):
@@ -101,8 +101,7 @@ class ia():
                 else:
                     self.neuronas[capa].append([n, random.random()])
 
-    def contadorPesos(self): # 1: 1 | 2: 4 | 3: 4 | 4: 1
-        #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
+    def contadorPesos(self): #Metodo para contar los pesos acorde a sus capas.
         for k in self.kNeuronas:
             if k != len(self.kNeuronas):
                 self.capaPeso[k] = []
@@ -117,7 +116,7 @@ class ia():
                         self.capaPeso[k][contador].append(i)
                         contador = contador +1
 
-    def imprimirRed(self):
+    def imprimirRed(self): #Metodo para testear en consola.
         linea = "_____________________________________"
         print(linea)
         for capa in self.kNeuronas:
@@ -139,57 +138,41 @@ class ia():
                 print(f'> j: [{cadaPeso[1]}]')
                 print(f'> i: [{cadaPeso[2]}]')
             print(linea)
+        print("Forward Propagation ~")
+        for resultado in self.forwardPropagationResults:
+            print(f'{resultado} -> {self.forwardPropagationResults[resultado]}')
+    def forwardPropagation(self): #Este metodo calcula toda la red neuronal aplicando la funcion de activacion sigmode 
+        def activacion(valor):
+            return 1 / (1 + pow(2.71828, -valor))
 
-    def backPropagation(self): #Funcion que hara el calculo final de Y.
-        for k in self.neuronas:
-            valor = 0
-            self.backPropagationResults[k] = [] #Se inicia la clave K con una lista vacía para que se almecenen individualmente los valores de esa capa K.
-            if k != 1: #si capa es 1 entonces son valores de entrada.
-                valor = []
-                #iterar en capas neuronales
-                #iterar en back propagation capas
-                #iterar en los pesos
-                #iterar en capas denuevo
-                iteracion = 0
-                for resultadoNeuronaAnterior in self.backPropagationResults[k-1]:
-                    for capapeso in self.capaPeso[k-1]:
-                        for capa in self.neuronas[k]:
-                            if capapeso[1] == self.neuronas[k-1][0][0] and capapeso[2] == capa[0]:
-                                iteracion = iteracion + 1  
-                                print(iteracion)
-                        
-            else:
-                valor = self.entradaValor(10, self.listaData) #Se llama a la funcion que transforma valores de entrada a minimos y maximos.
-                self.backPropagationResults[k].append(valor)
-                self.backPropagationResults[k].append(valor+1)
-                self.backPropagationResults[k].append(valor+2) #Se agrega a la capa K de backPropagationResults (diccionario), el valor (pasaría con todas las neuronas de entrada).
-
-
-
-
-        #for k in reversed(self.kNeuronas):
-        #    valor = 0
-        #    self.backPropagationResults[k] = [] #Se inicia la clave K con una lista vacía para que se almecenen individualmente los valores de esa capa K.
-        #    if k == 1: #si capa es 1 entonces son valores de entrada.
-        #        valor = self.entradaValor(10, self.listaData) #Se llama a la funcion que transforma valores de entrada a minimos y maximos.
-        #        self.backPropagationResults[k].append(valor) #Se agrega a la capa K de backPropagationResults (diccionario), el valor (pasaría con todas las neuronas de entrada).
-        #    else:
-        #        #Aquí en caso de que la capa no sea la primera, debemos hacer el calculo de su peso anterior por la neurona conectada por su umbral y almacenarlo en la capa correspondiente.
-        #        for capaAnterior in self.neuronas[k-1]:
-        #            
-
-
-
-            #for funcion in self.backPropagationResults[k-1]:
-            #    for omega in self.capaPeso[k-1]:
-            #        for capa in self.neuronas[k]:
-            #            if omega[1] == len(self.backPropagationResults[k-1]) and omega[2] == capa[0]:
-            #                self.backPropagationResults[k].append((funcion*omega[0])+capa[1])
-                            
-        print(f'BP -> {self.backPropagationResults}')
-        print(f'NEURONAS -> {self.neuronas}')
-        print(f'PESOS -> {self.capaPeso}')
-        #transformar el valor de entrada, multiplicar todos los pesos con los umbrales y almacenar el valor final Y, junto con S (otro diccionario)
+        for k in self.kNeuronas: #Recorremos las capas neuronales.
+            self.forwardPropagationResults[k] = [] #Se crea una clave K, y se rellena con una lista vacia, para almacenar las funciones de activación.
+            if k != 1: #Si K == 1 entonces se va por el else y agrega a la clave 1 los valores de entrada convertidos con la funcion entradaValor().
+                for neurona in self.neuronas[k]: #Para cada neurona en las neuronas totales de la capa K
+                    sumatoria = [] #Se crea una lista vacía que se reinicia con cada iteración para almacenar la sumatoria de los pesos * la funcion de activación de la neurona anterior.
+                    #print(neurona)
+                    for pesos in self.capaPeso[k-1]: #Ahora se entra a la capa de los pesos y la recorremos (k-1, porque las capas de los pesos son una menos que las neuronas).
+                        #print(pesos)
+                        contador = 1 #Hacemos un contador extra.
+                        for neuronaAnterior in self.forwardPropagationResults[k-1]: #Para cada funcion de activacion en las neuronas anteriores.
+                            #print(f'if {contador} == {pesos[1]} and {pesos[2]} == {neurona[0]}:')
+                            if contador == pesos[1] and pesos[2] == neurona[0]: #Se comprueba que se está lidiando con el peso correspondiente a las dos neuronas.
+                                sumatoria.append(pesos[0] * neuronaAnterior) #Se agrega a la lista momentanea para hacer la sumatoria.
+                            contador = contador + 1
+                    sumatoriaPesosNeurona = 0 #Se declara una variable.
+                    for suma in sumatoria: #Para cada valor en la sumatoria se sumarán todos.
+                        sumatoriaPesosNeurona += suma
+                    self.forwardPropagationResults[k].append(activacion(neurona[1] + sumatoriaPesosNeurona)) #Se agrega al diccionario de funciones de activación mediante el metodo activacion().
+                    #print(f'sumatoriaPesosNeurona ----- {sumatoriaPesosNeurona}')        
+                    #print(f'suma ------------------- {sumatoria}')
+            else: #El else mencionado anteriormente
+                for neuronas in range(1, self.kNeuronas[k]+1):
+                    self.forwardPropagationResults[k].append(self.entradaValor(neuronas+10, self.listaData))
         #luego sacar el error con respecto a cada peso y almacenarlo en otro diccionario (W: Error)
+
+    def creadorListaSY(self):
+        listaCantidadNeuronasFinales = self.forwardPropagationResults[len(self.kNeuronas)]
+        for valor in listaCantidadNeuronasFinales:
+            print(valor)
 if __name__ == "__main__":
     ia()
