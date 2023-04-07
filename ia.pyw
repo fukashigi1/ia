@@ -4,7 +4,8 @@ import tkinter.ttk as ttk
 from tkinter import *
 
 class ia():
-    def __init__(self): #MAIN
+    def __init__(self): #MAI
+        #LISTAS Y DICCIONARIOS
         self.data = {} #clave X, valor S
         #Primer valor: k, Segundo valor: n, Tercer valor: u.
         #K, indice totales de columnas de neuronas.
@@ -12,13 +13,22 @@ class ia():
         #U, es el umbral correspondiente a cada neurona.
         self.listaData = []
 
-        self.kNeuronas = {1: 1, 2: 3, 3: 1} #Se define la red neuronal.
+        self.kNeuronas = {1: 2, 2: 4, 3: 4, 4: 2} #Se define la red neuronal.
         self.neuronas = {} #Aquí se almacenarán las neuronas PrimerValor: N, SegundoValor: Umbral
         self.capaPeso = {} #capaPEso Primer valor: Indice de peso, Lista: [0 = peso, 1 = j, 2 = i]
 
+        self.historialMSE = []
+
+        self.nuevosPesos = {}
+
         self.forwardPropagationResults = {} #K, capa neuronal, Valor de la funcion de activacion.
-        self.sY = {} #Conformado por S: Y.
+        self.sY = [] #Conformado por S: Y.
         self.wE = {} #Conformado por W: Error.
+
+        self.listaCantidadNeuronasFinales = [] #Total de Y en todos los ejemplos de aprendizaje.
+
+        #VARIABLES
+        self.ratioAprendizaje = 0.01 #Esta constante es para establecer la multiplicación a la hora de calcular el nuevo peso.
 
         #Iniciar metodos
         
@@ -26,9 +36,12 @@ class ia():
         self.contadorPesos()
         self.creadorDeBD() #eliminar al poner interfaz
         self.convertidorDataALista()
-        self.forwardPropagation()
-        self.imprimirRed()
-        self.creadorListaSY()
+        for iteracion in range(0, len(self.listaData)):
+            self.forwardPropagation(self.listaData[iteracion])
+        #self.imprimirRed()
+        self.clasificador()
+        self.calculadorError()
+        self.nuevoPeso()
         #self.ventanaDisplay()
 
     def ventanaDisplay(self): #Método para mostrar ventana FRONT END.
@@ -69,17 +82,19 @@ class ia():
         # Agrega datos de ejemplo a la tabla
         for x, s in self.data.items():
             table.insert("", "end", values=(x, s))
-       
-    def creadorDeBD(self): #Este metodo es llamado desde el front end para generar la tabla.
+        #________________________________________________________________________________________________________________________________________________________________________________________       
+    
+
+
+    def creadorDeBD(self): 
         self.data.clear()
-        for x in range(1, 101):
-            x = random.randint(-1000, 1000)
-            if x >= 0:
-                s = 1
-            else:
-                s = 0
-            self.data[x] = s
-    #________________________________________________________________________________________________________________________________________________________________________________________       
+        for x in range(0, 50):
+            while True:
+                clave = random.randint(-1000, 1000)
+                if clave not in self.data:
+                    break
+            valor = 1 if clave >= 0 else 0
+            self.data[clave] = valor
 
     def convertidorDataALista(self): #Este metodo transforma el diccionario self.data en una lista que almacena los valores de X
         for clave in self.data:
@@ -138,10 +153,8 @@ class ia():
                 print(f'> j: [{cadaPeso[1]}]')
                 print(f'> i: [{cadaPeso[2]}]')
             print(linea)
-        print("Forward Propagation ~")
-        for resultado in self.forwardPropagationResults:
-            print(f'{resultado} -> {self.forwardPropagationResults[resultado]}')
-    def forwardPropagation(self): #Este metodo calcula toda la red neuronal aplicando la funcion de activacion sigmode 
+
+    def forwardPropagation(self, valorEntrada): #Este metodo calcula toda la red neuronal aplicando la funcion de activacion sigmode 
         def activacion(valor):
             return 1 / (1 + pow(2.71828, -valor))
 
@@ -167,12 +180,74 @@ class ia():
                     #print(f'suma ------------------- {sumatoria}')
             else: #El else mencionado anteriormente
                 for neuronas in range(1, self.kNeuronas[k]+1):
-                    self.forwardPropagationResults[k].append(self.entradaValor(neuronas+10, self.listaData))
+                    self.forwardPropagationResults[k].append(self.entradaValor(valorEntrada, self.listaData))
         #luego sacar el error con respecto a cada peso y almacenarlo en otro diccionario (W: Error)
+        self.listaCantidadNeuronasFinales.append(self.forwardPropagationResults[len(self.kNeuronas)])
+        #FIN METODO
 
-    def creadorListaSY(self):
-        listaCantidadNeuronasFinales = self.forwardPropagationResults[len(self.kNeuronas)]
-        for valor in listaCantidadNeuronasFinales:
-            print(valor)
+    def calculadorError(self):
+        #(1/50) * [(0 - y^1)^2 + (0 - y^2)^2 + ... + (-0.8560 - y^i)^2 + ... + (0 - y^50)^2]
+        mse = []
+        for i in range(0, len(self.sY)):
+            #print(f'({self.sY[i][0]} - {self.sY[i][1][0]}**2) = {(self.sY[i][0]-self.sY[i][1][0])**2}')
+            mse.append((self.sY[i][1][0] - self.sY[i][0])**2)
+        sumaMse = 0
+        for z in mse:
+            sumaMse = sumaMse + z
+        sumaMse = sumaMse / len(self.sY)
+        self.historialMSE.append(sumaMse)
+
+    def clasificador(self): #Este metodo agrega a una lista el valor esperado y el obtenido. En caso de tener mas de un valor esperado, cambiar X para una lista [] en self.data
+        iterador = 0
+        for x, s in self.data.items():
+            self.sY.append([s, self.listaCantidadNeuronasFinales[iterador]])
+            iterador = iterador + 1
+    
+    def nuevoPeso(self):
+        def dEdY():
+            #∂E/∂W = ∂E/∂Y * ∂Y/∂W
+            #∂E/∂Y = 2/n * sum(Yi-Si)
+            #w' = w - α * ∂E/∂W   α= tasa de aprendizaje (esta es la formula del descenso de gradiente)
+            resultadoSumatoriaLista = []
+
+            for i in range(0, len(self.sY)):
+                resultadoSumatoriaLista.append(self.sY[i][1][0] - self.sY[i][0])
+
+            sumaSum = 0
+            for z in resultadoSumatoriaLista:
+                sumaSum = sumaSum + z
+
+            dEdY = (2/len(self.listaData)) * sumaSum
+            return dEdY
+        
+        dEdW_Sumatoria = {}
+        for cantidad in range(1, self.kNeuronas[len(self.kNeuronas)]): #Para iterar la cantidad de veces que hayan neuronas en la ultima capa.
+            dEdW_Sumatoria[cantidad] = []
+            for capa in self.capaPeso: #Para cada capa en las capas de los pesos
+                print(f'Capa de Peso -> {capa}') 
+                for peso in self.capaPeso[capa]: #Para cada peso en la capa (para recorrer los pesos y cambiarlos)
+                    print(f'Peso -> {peso}')
+                    ecuacion = []
+                    for k in self.kNeuronas:
+                        print(f'Capa neuronal -> {k}')
+                        if k==1:
+                            for neurona in self.neuronas[k]:
+                                if neurona[0] == peso[1]:
+                                    print(self.forwardPropagationResults[k][peso[1]-1])
+                                    ecuacion.append(self.forwardPropagationResults[k][peso[1]-1])
+                            for neurona in self.neuronas[k+1]:
+                                if peso[2] == neurona[0]:
+                                    print(self.forwardPropagationResults[k+1][peso[2]-1])
+                                    ecuacion.append(self.forwardPropagationResults[k+1][peso[2]-1])
+                            print(ecuacion)
+                            print("_____________________________________________________")
+                            break
+                        #else:
+                        #    print(f'Capa neuronal -> {k}')
+                        #    for neurona in self.neuronas[k]:
+                        #        print(neurona)
+            print(self.forwardPropagationResults)
+            print(f'FIN ITERACIÓN N°{cantidad}')
+        #Recorrer neuronas y pesos, peso por peso en orden desde inicio a fin, si el peso de la iteración es igual al peso actual entonces pass else, ecuacion.append(neurona y peso)         
 if __name__ == "__main__":
     ia()
