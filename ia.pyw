@@ -179,9 +179,8 @@ class ia():
                     #print(f'sumatoriaPesosNeurona ----- {sumatoriaPesosNeurona}')        
                     #print(f'suma ------------------- {sumatoria}')
             else: #El else mencionado anteriormente
-                for neuronas in range(1, self.kNeuronas[k]+1):
-                    self.forwardPropagationResults[k].append(self.entradaValor(valorEntrada, self.listaData))
-        #luego sacar el error con respecto a cada peso y almacenarlo en otro diccionario (W: Error)
+                for neuronas in range(1, self.kNeuronas[k]+1): 
+                    self.forwardPropagationResults[k].append(self.entradaValor(self.listaData[neuronas-1], self.listaData))
         self.listaCantidadNeuronasFinales.append(self.forwardPropagationResults[len(self.kNeuronas)])
         #FIN METODO
 
@@ -221,33 +220,37 @@ class ia():
             return dEdY
         
         dEdW_Sumatoria = {}
-        for cantidad in range(1, self.kNeuronas[len(self.kNeuronas)]): #Para iterar la cantidad de veces que hayan neuronas en la ultima capa.
-            dEdW_Sumatoria[cantidad] = []
-            for capa in self.capaPeso: #Para cada capa en las capas de los pesos
-                print(f'Capa de Peso -> {capa}') 
-                for peso in self.capaPeso[capa]: #Para cada peso en la capa (para recorrer los pesos y cambiarlos)
-                    print(f'Peso -> {peso}')
-                    ecuacion = []
-                    for k in self.kNeuronas:
-                        print(f'Capa neuronal -> {k}')
-                        if k==1:
-                            for neurona in self.neuronas[k]:
-                                if neurona[0] == peso[1]:
-                                    print(self.forwardPropagationResults[k][peso[1]-1])
-                                    ecuacion.append(self.forwardPropagationResults[k][peso[1]-1])
-                            for neurona in self.neuronas[k+1]:
-                                if peso[2] == neurona[0]:
-                                    print(self.forwardPropagationResults[k+1][peso[2]-1])
-                                    ecuacion.append(self.forwardPropagationResults[k+1][peso[2]-1])
-                            print(ecuacion)
-                            print("_____________________________________________________")
-                            break
-                        #else:
-                        #    print(f'Capa neuronal -> {k}')
-                        #    for neurona in self.neuronas[k]:
-                        #        print(neurona)
-            print(self.forwardPropagationResults)
-            print(f'FIN ITERACIÓN N°{cantidad}')
+        dYdW = {}
+
+        def multiplicador(lista):
+            resultado = 1
+            for elemento in lista:
+                resultado = resultado * elemento
+            return resultado
+        
+        for capa in reversed(self.capaPeso):
+            print(f'Capa -> {capa}')
+            dYdW[capa] = []
+            for peso in reversed(self.capaPeso[capa]):
+                print(f'Peso: {peso}')
+                ecuacion = []
+                puntero = 0
+                for i in self.forwardPropagationResults[capa]:
+                    if puntero+1 == peso[1]:
+                        ecuacion.append(i)
+                    puntero = puntero + 1
+                puntero = 0
+                for i in self.forwardPropagationResults[capa+1]:
+                    if puntero +1 == peso[2]:
+                        ecuacion.append(i)
+                    puntero = puntero + 1
+                if capa == len(self.kNeuronas)-1:
+                    dYdW[capa].append(multiplicador(ecuacion))
+                else:
+                    pass
+                    #ESCRIBIR EL RESTO DE LA LÓGICA.
+                print(f'{ecuacion} ==== [j{peso[1]}] - [i{peso[2]}]')
+        print(dYdW)
         #Recorrer neuronas y pesos, peso por peso en orden desde inicio a fin, si el peso de la iteración es igual al peso actual entonces pass else, ecuacion.append(neurona y peso)         
 if __name__ == "__main__":
     ia()
