@@ -251,8 +251,11 @@ class ia():
                     if capa == len(self.kNeuronas)-1:
                         dYdW[capa].append([multiplicador(ecuacion), peso[1], peso[2]])
                     else:
+                        #ESCRIBIR EL RESTO DE LA LÓGICA.
                         sumatoria = []
                         for pesoAnterior in reversed(self.capaPeso[capa+1]):
+                            #idea 1_:por cada peso tomar el valor de i y tomar su neurona asociada, agregarlo a una lista independiente y al final agregarlo a ecuación.
+                            #idea 2_:si el pesoAnterior[2] == cantidad entonces agregar a ****ecuación****.
                             suma = 0
                             if peso[2] == pesoAnterior[1]:
                                 puntero = 0
@@ -261,7 +264,6 @@ class ia():
                                     if pesoAnterior[2] == puntero +1: #colocar if para comprobar que no es la ultima capa
                                         ecuacion.append([derivadaSigmoide(pesoAnterior[0]), derivadaSigmoide(neuronaAnterior)])
                                     puntero = puntero + 1
-                        #ESCRIBIR EL RESTO DE LA LÓGICA.
                     print(f'{ecuacion} ==== [j{peso[1]}] - [i{peso[2]}]')
         print(dYdW)
         #Recorrer neuronas y pesos, peso por peso en orden desde inicio a fin, si el peso de la iteración es igual al peso actual entonces pass else, ecuacion.append(neurona y peso)         
