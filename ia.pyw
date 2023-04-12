@@ -228,28 +228,41 @@ class ia():
                 resultado = resultado * elemento
             return resultado
         
-        for capa in reversed(self.capaPeso):
-            print(f'Capa -> {capa}')
-            dYdW[capa] = []
-            for peso in reversed(self.capaPeso[capa]):
-                print(f'Peso: {peso}')
-                ecuacion = []
-                puntero = 0
-                for i in self.forwardPropagationResults[capa]:
-                    if puntero+1 == peso[1]:
-                        ecuacion.append(i)
-                    puntero = puntero + 1
-                puntero = 0
-                for i in self.forwardPropagationResults[capa+1]:
-                    if puntero +1 == peso[2]:
-                        ecuacion.append(i)
-                    puntero = puntero + 1
-                if capa == len(self.kNeuronas)-1:
-                    dYdW[capa].append(multiplicador(ecuacion))
-                else:
-                    pass
-                    #ESCRIBIR EL RESTO DE LA LÓGICA.
-                print(f'{ecuacion} ==== [j{peso[1]}] - [i{peso[2]}]')
+        def derivadaSigmoide(valor):
+            return (valor * (1 - valor))
+
+        for cantidad in range(1, self.kNeuronas[len(self.kNeuronas)]+1):
+            for capa in reversed(self.capaPeso):
+                print(f'Capa -> {capa}')
+                dYdW[capa] = []
+                for peso in reversed(self.capaPeso[capa]):
+                    print(f'Peso: {peso}')
+                    ecuacion = []
+                    puntero = 0
+                    for i in self.forwardPropagationResults[capa]:
+                        if puntero+1 == peso[1]:
+                            ecuacion.append(derivadaSigmoide(i))
+                        puntero = puntero + 1
+                    puntero = 0
+                    for i in self.forwardPropagationResults[capa+1]:
+                        if puntero +1 == peso[2]:
+                            ecuacion.append(derivadaSigmoide(i))
+                        puntero = puntero + 1
+                    if capa == len(self.kNeuronas)-1:
+                        dYdW[capa].append([multiplicador(ecuacion), peso[1], peso[2]])
+                    else:
+                        sumatoria = []
+                        for pesoAnterior in reversed(self.capaPeso[capa+1]):
+                            suma = 0
+                            if peso[2] == pesoAnterior[1]:
+                                puntero = 0
+                                for neuronaAnterior in reversed(self.forwardPropagationResults[capa+2]):
+                                    #TOMAR LAS RUTAS ENTRE PESOS Y NEURONAS Y SUMARLAS AL FINAL
+                                    if pesoAnterior[2] == puntero +1: #colocar if para comprobar que no es la ultima capa
+                                        ecuacion.append([derivadaSigmoide(pesoAnterior[0]), derivadaSigmoide(neuronaAnterior)])
+                                    puntero = puntero + 1
+                        #ESCRIBIR EL RESTO DE LA LÓGICA.
+                    print(f'{ecuacion} ==== [j{peso[1]}] - [i{peso[2]}]')
         print(dYdW)
         #Recorrer neuronas y pesos, peso por peso en orden desde inicio a fin, si el peso de la iteración es igual al peso actual entonces pass else, ecuacion.append(neurona y peso)         
 if __name__ == "__main__":
